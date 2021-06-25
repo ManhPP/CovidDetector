@@ -38,7 +38,8 @@ class PEXP(nn.Module):
                                                kernel_size=3, groups=int(3 * n_input / 4), padding=1),
                                      nn.Conv2d(in_channels=int(3 * n_input / 4), out_channels=n_input // 2,
                                                kernel_size=1),
-                                     nn.Conv2d(in_channels=n_input // 2, out_channels=n_out, kernel_size=1),nn.BatchNorm2d(n_out))
+                                     nn.Conv2d(in_channels=n_input // 2, out_channels=n_out, kernel_size=1),
+                                     nn.BatchNorm2d(n_out))
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -111,8 +112,9 @@ class CovidNet(nn.Module):
         self.add_module('flatten', Flatten())
         self.add_module('fc1', nn.Linear(7 * 7 * 424, 512))
 
-
         self.add_module('classifier', nn.Linear(512, n_classes))
+        self.add_module('softmax', nn.Softmax(1))
+
         for m in self.modules():
             print(m)
             if isinstance(m, nn.Conv2d):
@@ -198,6 +200,6 @@ class CovidNet(nn.Module):
         flattened = self.flatten(pepx41 + pepx42 + pepx43)
 
         fc1out = F.relu(self.fc1(flattened))
-        #fc2out = F.relu(self.fc2(fc1out))
-        logits = self.classifier(fc1out)
-        return logits
+        fc2out = F.relu(self.classifier(fc1out))
+        output = self.softmax(fc2out)
+        return output
