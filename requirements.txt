@@ -10,3 +10,16 @@ omegaconf
 byol-pytorch
 einops
 torchxrayvision
+
+cycler
+decorator
+imageio
+kiwisolver
+networkx
+Pillow
+pyparsing
+python-dateutil
+PyWavelets
+scikit-image
+six
+opencv-python
