@@ -44,7 +44,10 @@ trainer:
     dim: [224,224] # image dimension
     train:
       augmentation: True # do augmentation to video
+      preprocessing: 1
     val:
       augmentation: False
+      preprocessing: 1
     test:
       augmentation: False
+      preprocessing: 1

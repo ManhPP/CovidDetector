@@ -1,12 +1,12 @@
 import os
-
-import torch
+import cv2 as cv
+from preprocessing.xray_processor import XRayProcessor
+import torchxrayvision as xrv
 from PIL import Image
 from torch.utils.data import Dataset
 from torch.utils.data.dataset import T_co
-import torchxrayvision as xrv
 from torchvision.transforms import transforms
-import torchvision.datasets
+
 
 class CovidDataset(Dataset):
     def __init__(self, config, mode, dim=(224, 224)):
@@ -14,7 +14,6 @@ class CovidDataset(Dataset):
         self.root = self.config.dataset.input_data + '/'
         self.mode = mode
         self.dim = dim
-
         data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
                                                 imgpath=self.root + "images",
                                                 csvpath=self.root + "metadata.csv")
@@ -25,6 +24,10 @@ class CovidDataset(Dataset):
         self.ind2class = {v: k for (k, v) in self.class_dict.items()}
         self.classes = list(self.class_dict.keys())
         self.labels = data_set.labels[:, 3]
+        self.preprocessing_dict = {1: XRayProcessor.clahe,
+                                   2: XRayProcessor.beasf,
+                                   3: XRayProcessor.hef,
+                                   4: XRayProcessor.unsharp_masking}
 
         split_len = int(0.1 * len(self.paths))
 
@@ -33,16 +36,20 @@ class CovidDataset(Dataset):
             self.labels = self.labels[:split]
             self.paths = self.paths[:split]
             self.do_augmentation = False
+            self.preprocessing = self.config.dataset.train.preprocessing
+
         if mode == 'val':
             split = split_len
-            self.labels = self.labels[split:2*split]
-            self.paths = self.paths[split:2*split]
+            self.labels = self.labels[split:2 * split]
+            self.paths = self.paths[split:2 * split]
             self.do_augmentation = False
+            self.preprocessing = self.config.dataset.train.preprocessing
         elif mode == 'train':
             split = 2 * split_len
             self.labels = self.labels[split:]
             self.paths = self.paths[split:]
             self.do_augmentation = True
+            self.preprocessing = self.config.dataset.train.preprocessing
 
         print("{} examples =  {}".format(mode, len(self.paths)))
 
@@ -58,7 +65,13 @@ class CovidDataset(Dataset):
     def load_image(self, img_path, dim):
         if not os.path.exists(img_path):
             print("IMAGE DOES NOT EXIST {}".format(img_path))
-        image = Image.open(img_path).convert('RGB')
+        if self.preprocessing > 0:
+            image = self.preprocessing_dict[self.preprocessing](img_path)
+            image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+            image = Image.fromarray(image)
+        else:
+            image = Image.open(img_path).convert('RGB')
+
         image = image.resize(dim)
 
         if self.do_augmentation:

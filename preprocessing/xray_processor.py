@@ -1,12 +1,13 @@
 import copy
 
 import cv2 as cv
+import imageio
 import numpy as np
 from scipy.fftpack import fft2, ifft2, fftshift
-import imageio
-import preprocessing.utils as utils
 from scipy.ndimage.filters import gaussian_filter, median_filter
 from skimage import img_as_float
+
+import preprocessing.utils as utils
 
 
 class XRayProcessor:
@@ -61,6 +62,7 @@ class XRayProcessor:
 
         res = copy.deepcopy(image)
         res[:, :] = mapping_vector[image[:, :]]
+        res = cv.cvtColor(res, cv.COLOR_GRAY2RGB)
         return res
 
     @staticmethod
@@ -69,20 +71,16 @@ class XRayProcessor:
         # create a CLAHE object (Arguments are optional).
         clahe = cv.createCLAHE(clipLimit=clip_limit, tileGridSize=(window_size, window_size))
         cl1 = clahe.apply(img)
-        # cv.imwrite(filename.split(".")[:-1]+"_result." + filename.split(".")[-1], cl1)
+        cl1 = cv.cvtColor(cl1, cv.COLOR_GRAY2RGB)
         return cl1
 
     @staticmethod
     def hef(filename, d0v=1):
         """Runs the algorithm for the image."""
         assert 1 <= d0v <= 90
-        image = imageio.imread(filename)
+        img_grayscale = cv.imread(filename,  0)
 
-        if len(image.shape) == 3:
-            img_grayscale = utils.to_grayscale(image)
-        else:
-            img_grayscale = image
-        img = utils.normalize(np.min(img_grayscale), np.max(image), 0, 255,
+        img = utils.normalize(np.min(img_grayscale), np.max(img_grayscale), 0, 255,
                               img_grayscale)
         # HF part
         img_fft = fft2(img)  # img after fourier transformation
@@ -115,9 +113,11 @@ class XRayProcessor:
 
         for i in range(m):
             for j in range(n):
-                image[i][j] = hist_eq[img_hef[i][j]]
+                img_grayscale[i][j] = hist_eq[img_hef[i][j]]
 
-        return image.astype(np.uint8)
+        img_grayscale = cv.cvtColor(img_grayscale, cv.COLOR_GRAY2RGB)
+
+        return img_grayscale
 
     @staticmethod
     def unsharp_masking(filename, filter_type="gauss", radius=5, amount=2):
@@ -136,5 +136,4 @@ class XRayProcessor:
 
         sharpened_image = np.clip(sharpened_image, float(0), float(1))
         sharpened_image = (sharpened_image * 255).astype(np.uint8)
-
         return sharpened_image
