@@ -1,11 +1,12 @@
 import os
-import cv2 as cv
-from preprocessing.xray_processor import XRayProcessor
+
 import torchxrayvision as xrv
 from PIL import Image
 from torch.utils.data import Dataset
 from torch.utils.data.dataset import T_co
 from torchvision.transforms import transforms
+
+from preprocessing.xray_processor import XRayProcessor
 
 
 class CovidDataset(Dataset):
@@ -14,20 +15,21 @@ class CovidDataset(Dataset):
         self.root = self.config.dataset.input_data + '/'
         self.mode = mode
         self.dim = dim
-        data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
-                                                imgpath=self.root + "images",
-                                                csvpath=self.root + "metadata.csv")
-
-        self.paths = "images/" + data_set.csv["filename"]
-        self.paths = self.paths.to_list()
         self.class_dict = {"COVID": 1, "NON-COVID": 0}
         self.ind2class = {v: k for (k, v) in self.class_dict.items()}
         self.classes = list(self.class_dict.keys())
-        self.labels = data_set.labels[:, 3]
-        self.preprocessing_dict = {1: XRayProcessor.clahe,
-                                   2: XRayProcessor.beasf,
-                                   3: XRayProcessor.hef,
-                                   4: XRayProcessor.unsharp_masking}
+
+        data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
+                                                imgpath=self.root + "covid/images",
+                                                csvpath=self.root + "covid/metadata.csv")
+        self.paths = list("covid/images/" + data_set.csv["filename"])
+        self.labels = list(data_set.labels[:, 3])
+
+        actualmed_data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
+                                                          imgpath=self.root + "actualmed-covid/images",
+                                                          csvpath=self.root + "actualmed-covid/metadata.csv")
+        self.paths.extend(list("actualmed-covid/images/" + actualmed_data_set.csv["imagename"]))
+        self.labels.extend([1 if i == 1 else 0 for i in actualmed_data_set.labels[:, 0]])
 
         split_len = int(0.1 * len(self.paths))
 
@@ -65,9 +67,9 @@ class CovidDataset(Dataset):
     def load_image(self, img_path, dim):
         if not os.path.exists(img_path):
             print("IMAGE DOES NOT EXIST {}".format(img_path))
-        if self.preprocessing > 0:
-            image = self.preprocessing_dict[self.preprocessing](img_path)
-            image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+        if self.preprocessing:
+            image = XRayProcessor.combine_preprocessing(img_path)
+            # image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
             image = Image.fromarray(image)
         else:
             image = Image.open(img_path).convert('RGB')

@@ -23,3 +23,5 @@ PyWavelets
 scikit-image
 six
 opencv-python
+
+torchviz

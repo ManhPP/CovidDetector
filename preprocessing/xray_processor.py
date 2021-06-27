@@ -1,11 +1,9 @@
 import copy
 
 import cv2 as cv
-import imageio
 import numpy as np
 from scipy.fftpack import fft2, ifft2, fftshift
-from scipy.ndimage.filters import gaussian_filter, median_filter
-from skimage import img_as_float
+from skimage.filters import unsharp_mask
 
 import preprocessing.utils as utils
 
@@ -13,8 +11,8 @@ import preprocessing.utils as utils
 class XRayProcessor:
 
     @staticmethod
-    def beasf(filename, gamma=0.5):
-        image = cv.imread(filename, 0)
+    def beasf(image, gamma=0.5):
+        # image = cv.imread(filename, 0)
         m = int(np.mean(image, dtype=np.int32))
         h = np.histogram(image, bins=256)[0] / (image.shape[0] * image.shape[1])
         h_lower = utils.sub_hist(image_pdf=h, minimum=0, maximum=m, normalize=True)
@@ -62,23 +60,23 @@ class XRayProcessor:
 
         res = copy.deepcopy(image)
         res[:, :] = mapping_vector[image[:, :]]
-        res = cv.cvtColor(res, cv.COLOR_GRAY2RGB)
+        # res = cv.cvtColor(res, cv.COLOR_GRAY2RGB)
         return res
 
     @staticmethod
-    def clahe(filename, clip_limit=4, window_size=8):
-        img = cv.imread(filename, 0)
+    def clahe(img, clip_limit=4, window_size=8):
+        # img = cv.imread(filename, 0)
         # create a CLAHE object (Arguments are optional).
         clahe = cv.createCLAHE(clipLimit=clip_limit, tileGridSize=(window_size, window_size))
         cl1 = clahe.apply(img)
-        cl1 = cv.cvtColor(cl1, cv.COLOR_GRAY2RGB)
+        # cl1 = cv.cvtColor(cl1, cv.COLOR_GRAY2RGB)
         return cl1
 
     @staticmethod
-    def hef(filename, d0v=1):
+    def hef(img_grayscale, d0v=1):
         """Runs the algorithm for the image."""
         assert 1 <= d0v <= 90
-        img_grayscale = cv.imread(filename,  0)
+        # img_grayscale = cv.imread(filename,  0)
 
         img = utils.normalize(np.min(img_grayscale), np.max(img_grayscale), 0, 255,
                               img_grayscale)
@@ -115,25 +113,46 @@ class XRayProcessor:
             for j in range(n):
                 img_grayscale[i][j] = hist_eq[img_hef[i][j]]
 
-        img_grayscale = cv.cvtColor(img_grayscale, cv.COLOR_GRAY2RGB)
+        # img_grayscale = cv.cvtColor(img_grayscale, cv.COLOR_GRAY2RGB)
 
         return img_grayscale
 
     @staticmethod
-    def unsharp_masking(filename, filter_type="gauss", radius=5, amount=2):
-        image = imageio.imread(filename)
-        image = img_as_float(image)
+    def unsharp_masking(image, radius=5, amount=2):
+        # image = imageio.imread(filename)
+        # image = img_as_float(image)
+        #
+        # if filter_type == "gauss":
+        #     blurred_image = gaussian_filter(image, sigma=radius)
+        # elif filter_type == "median":
+        #     blurred_image = median_filter(image, size=20)
+        # else:
+        #     assert "not support"
+        #
+        # mask = image - blurred_image
+        # sharpened_image = image + mask * amount
+        #
+        # sharpened_image = np.clip(sharpened_image, float(0), float(1))
+        # sharpened_image = (sharpened_image * 255).astype(np.uint8)
 
-        if filter_type == "gauss":
-            blurred_image = gaussian_filter(image, sigma=radius)
-        elif filter_type == "median":
-            blurred_image = median_filter(image, size=20)
-        else:
-            assert "not support"
-
-        mask = image - blurred_image
-        sharpened_image = image + mask * amount
-
-        sharpened_image = np.clip(sharpened_image, float(0), float(1))
+        sharpened_image = unsharp_mask(image, radius, amount)
         sharpened_image = (sharpened_image * 255).astype(np.uint8)
         return sharpened_image
+
+    @staticmethod
+    def combine_preprocessing(filename, radius=3, amount=1, clip_limit=4, window_size=8, gamma=0.5, d0v=1):
+        image = cv.imread(filename, 0)
+        image = XRayProcessor.unsharp_masking(image, radius, amount)
+
+        image = XRayProcessor.clahe(image, clip_limit, window_size)
+        image = XRayProcessor.beasf(image, gamma)
+
+        image = XRayProcessor.hef(image, d0v)
+
+        image = cv.medianBlur(image, 5)
+
+        img_grayscale = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
+
+        return img_grayscale
+
+

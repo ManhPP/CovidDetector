@@ -37,17 +37,17 @@ trainer:
       shuffle: False
       num_workers: 2
   dataset:
-    input_data: data/covid
+    input_data: data
     name: COVID # dataset name COVIDx or COVID_CT
     type: binary
     modality: RGB # type of modality
     dim: [224,224] # image dimension
     train:
       augmentation: True # do augmentation to video
-      preprocessing: 1
+      preprocessing: False
     val:
       augmentation: False
-      preprocessing: 1
+      preprocessing: True
     test:
       augmentation: False
-      preprocessing: 1
+      preprocessing: True

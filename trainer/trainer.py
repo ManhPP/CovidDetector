@@ -155,7 +155,7 @@ class Trainer(BaseTrainer):
             self.checkpointer(epoch, validation_loss)
             self.lr_scheduler.step(validation_loss)
             if self.do_test:
-                self.logger.info(f"{'!' * 10}    VALIDATION   , {'!' * 10}")
+                self.logger.info(f"{'!' * 10}    TEST   , {'!' * 10}")
                 self.predict(epoch)
 
     def predict(self, epoch):

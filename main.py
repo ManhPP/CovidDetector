@@ -1,11 +1,11 @@
 import datetime
 import os
 import shutil
-import sys
 
 import torch
 from omegaconf import OmegaConf
 from torch.utils.tensorboard import SummaryWriter
+from torchviz import make_dot
 
 import utils.util as util
 from logger.logger import Logger
@@ -79,6 +79,10 @@ def main():
 
     optimizer, scheduler = select_optimizer(model, config['model'], None)
     log.info(f'{model}')
+    # view model
+    x = torch.randn(24, 3, 224, 224)
+    yhat = model(x)
+    make_dot(yhat, params=dict(list(model.named_parameters()))).render("cnn_torchviz", format="png")
     log.info(f"Checkpoint Folder {cpkt_fol_name} ")
     shutil.copy(os.path.join(config.cwd, config_file), cpkt_fol_name)
 
