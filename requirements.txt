@@ -25,3 +25,4 @@ six
 opencv-python
 
 torchviz
+Flask

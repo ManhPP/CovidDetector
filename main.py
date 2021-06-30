@@ -79,10 +79,12 @@ def main():
 
     optimizer, scheduler = select_optimizer(model, config['model'], None)
     log.info(f'{model}')
+
     # view model
-    x = torch.randn(24, 3, 224, 224)
-    yhat = model(x)
-    make_dot(yhat, params=dict(list(model.named_parameters()))).render("cnn_torchviz", format="png")
+    # x = torch.randn(24, 3, 224, 224)
+    # yhat = model(x)
+    # make_dot(yhat, params=dict(list(model.named_parameters()))).render("cnn_torchviz", format="png")
+
     log.info(f"Checkpoint Folder {cpkt_fol_name} ")
     shutil.copy(os.path.join(config.cwd, config_file), cpkt_fol_name)
 
