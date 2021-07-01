@@ -76,7 +76,9 @@ def predict():
 
     image = transform(image)
 
-    normalize_image = normalize(image)
+    # normalize_image = normalize(image)
+    normalize_image = image
+
     normalize_image = normalize_image.unsqueeze(0)
     if torch.cuda.is_available():
         normalize_image = normalize_image.cuda()
