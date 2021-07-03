@@ -12,7 +12,7 @@ trainer:
 
   log_interval: 100 # print statistics every log_interval
   model:
-    name: COVIDNet_small # models name  [mobilenet_v2,COVIDNet_small]
+    name: COVIDNet_large # models name  [mobilenet_v2,COVIDNet_small]
     optimizer: # optimizer configuration
       type: SGD # optimizer type
       lr: 1e-2 # learning rate
@@ -25,11 +25,11 @@ trainer:
       scheduler_verbose: True # print if learning rate is changed
   dataloader:
     train:
-      batch_size: 24 # batch size
+      batch_size: 64 # batch size
       shuffle: True # shuffle samples after every epoch
       num_workers: 4 # number of thread for dataloader1
     val:
-      batch_size: 24
+      batch_size: 64
       shuffle: False
       num_workers: 4
     test:

@@ -101,10 +101,10 @@ class CovidNet(nn.Module):
 
         if (model == 'large'):
 
-            self.add_module('conv1_1x1', nn.Conv2d(in_channels=56, out_channels=112, kernel_size=1))
-            self.add_module('conv2_1x1', nn.Conv2d(in_channels=112, out_channels=216, kernel_size=1))
-            self.add_module('conv3_1x1', nn.Conv2d(in_channels=216, out_channels=424, kernel_size=1))
-            self.add_module('conv4_1x1', nn.Conv2d(in_channels=424, out_channels=424, kernel_size=1))
+            self.add_module('conv1_1x1', nn.Conv2d(in_channels=56, out_channels=56, kernel_size=1))
+            self.add_module('conv2_1x1', nn.Conv2d(in_channels=56, out_channels=112, kernel_size=1))
+            self.add_module('conv3_1x1', nn.Conv2d(in_channels=112, out_channels=216, kernel_size=1))
+            self.add_module('conv4_1x1', nn.Conv2d(in_channels=216, out_channels=424, kernel_size=1))
 
             self.__forward__ = self.forward_large_net
         else:
