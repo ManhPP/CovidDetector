@@ -10,11 +10,11 @@ trainer:
   gradient_accumulation: 1 # gradient accumulation steps
   pretrained_cpkt: trainer/improved-covidnet_small.pt
 
-  log_interval: 100 # print statistics every log_interval
+  log_interval: 10 # print statistics every log_interval
   model:
     name: COVIDNet_large # models name  [mobilenet_v2,COVIDNet_small]
     optimizer: # optimizer configuration
-      type: SGD # optimizer type
+      type: Adam # optimizer type
       lr: 1e-2 # learning rate
       weight_decay: 0.000001 # weight decay
     scheduler: # learning rate scheduler
@@ -48,7 +48,7 @@ trainer:
       preprocessing: False
     val:
       augmentation: False
-      preprocessing: True
+      preprocessing: False
     test:
       augmentation: False
-      preprocessing: True
+      preprocessing: False
