@@ -19,17 +19,45 @@ class CovidDataset(Dataset):
         self.ind2class = {v: k for (k, v) in self.class_dict.items()}
         self.classes = list(self.class_dict.keys())
 
-        data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
-                                                imgpath=self.root + "covid/images",
-                                                csvpath=self.root + "covid/metadata.csv")
-        self.paths = list("covid/images/" + data_set.csv["filename"])
-        self.labels = list(data_set.labels[:, 3])
+        if 1 in self.config.dataset.preprocess_data:
+            data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
+                                                    imgpath=self.root + "covid/images",
+                                                    csvpath=self.root + "covid/metadata.csv")
+            self.paths = list("covid/images/" + data_set.csv["filename"])
+            self.labels = list(data_set.labels[:, 3])
 
-        actualmed_data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
-                                                          imgpath=self.root + "actualmed-covid/images",
-                                                          csvpath=self.root + "actualmed-covid/metadata.csv")
-        self.paths.extend(list("actualmed-covid/images/" + actualmed_data_set.csv["imagename"]))
-        self.labels.extend([1 if i == 1 else 0 for i in actualmed_data_set.labels[:, 0]])
+            actualmed_data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
+                                                              imgpath=self.root + "actualmed-covid/images",
+                                                              csvpath=self.root + "actualmed-covid/metadata.csv")
+            self.paths.extend(list("actualmed-covid/images/" + actualmed_data_set.csv["imagename"]))
+            self.labels.extend([1 if i == 1 else 0 for i in actualmed_data_set.labels[:, 0]])
+
+        if 2 in self.config.dataset.preprocess_data:
+            data_set_combine = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
+                                                    imgpath=self.root + "covid_combine/images",
+                                                    csvpath=self.root + "covid_combine/metadata.csv")
+            self.paths = list("covid_combine/images/" + data_set_combine.csv["filename"])
+            self.labels = list(data_set_combine.labels[:, 3])
+
+            actualmed_data_set_combine = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
+                                                              imgpath=self.root + "actualmed-covid_combine/images",
+                                                              csvpath=self.root + "actualmed-covid_combine/metadata.csv")
+            self.paths.extend(list("actualmed-covid_combine/images/" + actualmed_data_set_combine.csv["imagename"]))
+            self.labels.extend([1 if i == 1 else 0 for i in actualmed_data_set_combine.labels[:, 0]])
+
+        if 3 in self.config.dataset.preprocess_data:
+            data_set_he = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
+                                                    imgpath=self.root + "covid_he/images",
+                                                    csvpath=self.root + "covid_he/metadata.csv")
+            self.paths = list("covid_he/images/" + data_set_he.csv["filename"])
+            self.labels = list(data_set_he.labels[:, 3])
+
+            actualmed_data_set_he = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
+                                                              imgpath=self.root + "actualmed-covid_he/images",
+                                                              csvpath=self.root + "actualmed-covid_he/metadata.csv")
+            self.paths.extend(list("actualmed-covid_he/images/" + actualmed_data_set_he.csv["imagename"]))
+            self.labels.extend([1 if i == 1 else 0 for i in actualmed_data_set_he.labels[:, 0]])
+
 
         split_len = int(0.1 * len(self.paths))
 

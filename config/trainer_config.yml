@@ -41,6 +41,7 @@ trainer:
     name: COVID # dataset name COVIDx or COVID_CT
     type: binary
     modality: RGB # type of modality
+    preprocess_data: [1,2,3] #[1-origin,2-combine,3-he]
     dim: [224,224] # image dimension
     train:
       augmentation: True # do augmentation to video
