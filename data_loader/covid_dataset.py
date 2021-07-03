@@ -19,12 +19,15 @@ class CovidDataset(Dataset):
         self.ind2class = {v: k for (k, v) in self.class_dict.items()}
         self.classes = list(self.class_dict.keys())
 
+        self.paths = []
+        self.labels = []
+
         if 1 in self.config.dataset.preprocess_data:
             data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
                                                     imgpath=self.root + "covid/images",
                                                     csvpath=self.root + "covid/metadata.csv")
-            self.paths = list("covid/images/" + data_set.csv["filename"])
-            self.labels = list(data_set.labels[:, 3])
+            self.paths.extend(list("covid/images/" + data_set.csv["filename"]))
+            self.labels.extend(list(data_set.labels[:, 3]))
 
             actualmed_data_set = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
                                                               imgpath=self.root + "actualmed-covid/images",
@@ -36,8 +39,8 @@ class CovidDataset(Dataset):
             data_set_combine = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
                                                     imgpath=self.root + "covid_combine/images",
                                                     csvpath=self.root + "covid_combine/metadata.csv")
-            self.paths = list("covid_combine/images/" + data_set_combine.csv["filename"])
-            self.labels = list(data_set_combine.labels[:, 3])
+            self.paths.extend(list("covid_combine/images/" + data_set_combine.csv["filename"]))
+            self.labels.extend(list(data_set_combine.labels[:, 3]))
 
             actualmed_data_set_combine = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
                                                               imgpath=self.root + "actualmed-covid_combine/images",
@@ -49,8 +52,8 @@ class CovidDataset(Dataset):
             data_set_he = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
                                                     imgpath=self.root + "covid_he/images",
                                                     csvpath=self.root + "covid_he/metadata.csv")
-            self.paths = list("covid_he/images/" + data_set_he.csv["filename"])
-            self.labels = list(data_set_he.labels[:, 3])
+            self.paths.extend(list("covid_he/images/" + data_set_he.csv["filename"]))
+            self.labels.extend(list(data_set_he.labels[:, 3]))
 
             actualmed_data_set_he = xrv.datasets.COVID19_Dataset(views=["PA", "AP"],
                                                               imgpath=self.root + "actualmed-covid_he/images",
