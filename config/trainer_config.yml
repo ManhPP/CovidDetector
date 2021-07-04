@@ -7,7 +7,6 @@ trainer:
   gpu: 0,1 # id of gpu
   save: True # save checkpoint
   load: False # load pretrained checkpoint
-  gradient_accumulation: 1 # gradient accumulation steps
   pretrained_cpkt: trainer/improved-covidnet_small.pt
 
   log_interval: 10 # print statistics every log_interval

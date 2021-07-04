@@ -6,7 +6,7 @@ import torch
 from base.base_trainer import BaseTrainer
 from models.metric import sensitivity, positive_predictive_value
 from utils.util import MetricTracker
-from utils.util import write_csv, save_model,make_dirs
+from utils.util import write_csv, save_model, make_dirs
 
 
 class Trainer(BaseTrainer):
@@ -41,12 +41,11 @@ class Trainer(BaseTrainer):
         self.optimizer = optimizer
 
         self.mnt_best = np.inf
-        if self.config.dataset.type =='multi_target':
+        if self.config.dataset.type == 'multi_target':
             self.criterion = torch.nn.BCEWithLogitsLoss(reduction='mean')
         else:
             self.criterion = torch.nn.CrossEntropyLoss(reduction='mean')
         self.checkpoint_dir = checkpoint_dir
-        self.gradient_accumulation = config.gradient_accumulation
         self.writer = writer
         self.metric_ftns = ['loss', 'acc']
         self.train_metrics = MetricTracker(*[m for m in self.metric_ftns], writer=self.writer, mode='train')
@@ -55,6 +54,7 @@ class Trainer(BaseTrainer):
         self.logger = logger
 
         self.confusion_matrix = torch.zeros(self.num_classes, self.num_classes)
+
     def _train_epoch(self, epoch):
         """
         Training logic for an epoch
@@ -64,29 +64,28 @@ class Trainer(BaseTrainer):
         """
 
         self.model.train()
-        self.confusion_matrix = 0* self.confusion_matrix
+        self.confusion_matrix = 0 * self.confusion_matrix
         self.train_metrics.reset()
-        gradient_accumulation = self.gradient_accumulation
         for batch_idx, (data, target) in enumerate(self.train_data_loader):
 
             data = data.to(self.device)
 
             target = target.to(self.device)
+            self.optimizer.zero_grad()  # Reset gradients tensors
 
             output = self.model(data)
             loss = self.criterion(output, target)
             # loss = loss.mean()
 
-            (loss / gradient_accumulation).backward()
-            if (batch_idx % gradient_accumulation == 0):
-                self.optimizer.step()  # Now we can do an optimizer step
-                self.optimizer.zero_grad()  # Reset gradients tensors
+            loss.backward()
+            self.optimizer.step()  # Now we can do an optimizer step
 
             prediction = torch.max(output, 1)
 
             writer_step = (epoch - 1) * self.len_epoch + batch_idx
 
             self.train_metrics.update(key='loss', value=loss.item(), n=1, writer_step=writer_step)
+
             self.train_metrics.update(key='acc',
                                       value=np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()),
                                       n=target.size(0), writer_step=writer_step)
@@ -110,7 +109,7 @@ class Trainer(BaseTrainer):
         self.model.eval()
         self.valid_sentences = []
         self.valid_metrics.reset()
-        self.confusion_matrix = 0* self.confusion_matrix
+        self.confusion_matrix = 0 * self.confusion_matrix
         with torch.no_grad():
             for batch_idx, (data, target) in enumerate(loader):
                 data = data.to(self.device)
