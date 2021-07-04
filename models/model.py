@@ -169,8 +169,8 @@ class CovidNet(nn.Module):
         fc1out = F.relu(self.fc1(flattened))
 
         logits = self.classifier(fc1out)
-        output = self.softmax(logits)
-        return output
+        # output = self.softmax(logits)
+        return logits
 
     def forward_small_net(self, x, target=None):
         x = F.max_pool2d(F.relu(self.conv1(x)), 2)
@@ -202,5 +202,5 @@ class CovidNet(nn.Module):
 
         fc1out = F.relu(self.fc1(flattened))
         fc2out = self.classifier(fc1out)
-        output = self.softmax(fc2out)
-        return output
+        # output = self.softmax(fc2out)
+        return fc2out

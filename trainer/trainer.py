@@ -75,7 +75,7 @@ class Trainer(BaseTrainer):
 
             output = self.model(data)
             loss = self.criterion(output, target)
-            loss = loss.mean()
+            # loss = loss.mean()
 
             (loss / gradient_accumulation).backward()
             if (batch_idx % gradient_accumulation == 0):
