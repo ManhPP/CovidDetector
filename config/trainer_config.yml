@@ -11,7 +11,7 @@ trainer:
 
   log_interval: 10 # print statistics every log_interval
   model:
-    name: COVIDNet_large # models name  [mobilenet_v2,COVIDNet_small]
+    name: COVIDNet_small # models name  [mobilenet_v2,COVIDNet_small]
     optimizer: # optimizer configuration
       type: Adam # optimizer type
       lr: 1e-2 # learning rate
