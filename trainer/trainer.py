@@ -173,7 +173,7 @@ class Trainer(BaseTrainer):
             for batch_idx, (data, target) in enumerate(self.test_data_loader):
                 data = data.to(self.device)
 
-                logits = self.model(data, None)
+                logits = self.model(data)
 
                 maxes, prediction = torch.max(logits, 1)  # get the index of the max log-probability
                 # log.info()

@@ -147,7 +147,7 @@ class XRayProcessor:
         image = XRayProcessor.clahe(image, clip_limit, window_size)
         image = XRayProcessor.beasf(image, gamma)
 
-        image = XRayProcessor.hef(image, d0v)
+        # image = XRayProcessor.hef(image, d0v)
 
         image = cv.medianBlur(image, 5)
 

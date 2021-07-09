@@ -18,9 +18,13 @@ config_file = '../config/trainer_config.yml'
 config = OmegaConf.load(os.path.join(cwd, config_file))['trainer']
 config.cwd = str(cwd)
 reproducibility(config)
-checkpoint = '_model_last_checkpoint.pth.tar'
+checkpoint = '/Users/macbookpro/Workspace/covid19/CovidDetector/checkpoints/model_COVIDNet_small/dataset_COVID' \
+             '/date_08_07_2021_14.10.36/_model_best_checkpoint.pth.tar'
 
-checkpoint = torch.load(checkpoint)
+use_cuda = torch.cuda.is_available()
+
+device = torch.device("cuda:0" if use_cuda else "cpu")
+checkpoint = torch.load(checkpoint, map_location=device)
 
 state_dict = checkpoint['state_dict']
 
@@ -83,7 +87,7 @@ def predict():
     if torch.cuda.is_available():
         normalize_image = normalize_image.cuda()
 
-    output = model(normalize_image)
+    output = torch.softmax(model(normalize_image), 1)
     print(output)
 
     prediction_score, pred_label_idx = torch.topk(output, 1)
